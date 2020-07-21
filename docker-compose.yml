@@ -1,19 +1,45 @@
 version: '3'
 
 services:
-#  db:
-#    image: postgres
-#    environment:
-#      - POSTGRES_DB=postgres
-#      - POSTGRES_USER=postgres
-#      - POSTGRES_PASSWORD=postgres
-
-  web:
-    build: .
-#      command: python manage.py runserver 0.0.0.0:8000
+  db:
+    image: postgres
+    env_file: .env
     volumes:
-      - .:/code
+      - db_volume:/var/lib/postgresql/data
+
+  app:
+    build: .
+    env_file: .env
+    volumes:
+      - .:/opt/services/app/src
+      - static:/opt/services/app/static
+      - media:/opt/services/app/media
+    depends_on:
+      - db
+    networks:
+      - db_network
+      - nginx_network
+
+  nginx:
+    image: nginx
     ports:
-      - "8000:8000"
-#    depends_on:
-#      - db
+      - 8000:80
+    volumes:
+      - ./config/nginx/conf.d:/etc/nginx/conf.d
+      - static:/opt/services/app/static
+      - media:/opt/services/app/media
+    networks:
+      - nginx_network
+    depends_on:
+      - app
+
+networks:
+  db_network:
+    driver: bridge
+  nginx_network:
+    driver: bridge
+
+volumes:
+  db_volume:
+  static:
+  media:

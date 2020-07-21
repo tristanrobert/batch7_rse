@@ -1,4 +1,4 @@
-from batch7rse.settings.base import *
+from .base import *
 import django_heroku
 
 # SECURITY WARNING: don't run with debug turned on in production!
